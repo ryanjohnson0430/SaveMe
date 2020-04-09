@@ -1,32 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
-class ReportsPage extends StatelessWidget {
-  final Color color;
-
-  ReportsPage(this.color);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: color,
-    );
-  }
-
-}
-
-class Chart extends StatefulWidget {
+class ReportsPage extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return _ChartState();
+    return _ReportsPageState();
   }
 }
 
 
 //pie chart
-class _ChartState extends State<Chart>{
+class _ReportsPageState extends State<ReportsPage>{
 
   List<PieChartSectionData> _sections = List<PieChartSectionData>();
 
@@ -80,7 +66,7 @@ class _ChartState extends State<Chart>{
               PieChartData(
                   sections: _sections,
               borderData: FlBorderData(show: false),
-              centerSpaceRadius: 40,
+              centerSpaceRadius: 50,
               sectionsSpace: 0
               ),
             ),

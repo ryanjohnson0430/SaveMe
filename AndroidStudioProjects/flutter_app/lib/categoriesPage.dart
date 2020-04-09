@@ -15,6 +15,8 @@ class CategoriesPage extends StatefulWidget {
 class _CategoriesPageState extends State<CategoriesPage> {
 
   String _category;
+  String _description;
+  int _monthlyBudget;
 
   List<Categories> _categories = [];
 
@@ -35,35 +37,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   Text(item.name, style: _style),
                 ]
             ),
-            onPressed: () => _showDescription(item),
+            onPressed: () => _edit(context, item),
           )
       ),
       onDismissed: (DismissDirection direction) => _delete(item),
     );
-  }
-
-  void _showDescription(Categories item) async {
-    print(item.description);
-  }
-
-  void _delete(Categories item) async {
-
-    DB.delete(Categories.table, item);
-    refresh();
-  }
-
-  void _save() async {
-
-    Navigator.of(context).pop();
-    Categories item = Categories(
-        name: _category,
-        description: "placeholder description",
-        monthlyBudget: 500
-    );
-
-    await DB.insert(Categories.table, item);
-    setState(() => _category = '' );
-    refresh();
   }
 
   void _create(BuildContext context) {
@@ -80,17 +58,130 @@ class _CategoriesPageState extends State<CategoriesPage> {
               ),
               FlatButton(
                   child: Text('Save'),
-                  onPressed: () => _save()
+                  onPressed: () {
+                    _save();
+                  }
               )
             ],
-            content: TextField(
-              autofocus: true,
-              decoration: InputDecoration(labelText: 'Category Name', hintText: 'e.g. Rent'),
-              onChanged: (value) { _category = value; },
+            content: Column(
+              children: <Widget>[
+                TextFormField(
+                  autofocus: true,
+                  decoration: InputDecoration(labelText: 'Category Name', hintText: 'e.g. Rent'),
+                  onChanged: (value) { _category = value; },
+                  validator: (value) {
+                    if (value.isEmpty) {
+                      return 'Please enter a Name';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Description'),
+                  onChanged: (value) { _description = value; },
+                ),
+                TextFormField(
+                  decoration: InputDecoration(labelText: 'Monthly Budget', hintText: 'Enter a Number'),
+                  onChanged: (value) { _monthlyBudget = int.parse(value); },
+                )
+              ],
             ),
           );
         }
     );
+  }
+
+  void _edit(BuildContext context, Categories item) {
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Edit Category"),
+            actions: <Widget>[
+              FlatButton(
+                  child: Text('Cancel'),
+                  onPressed: () => Navigator.of(context).pop()
+              ),
+              FlatButton(
+                  child: Text('Save'),
+                  onPressed: () {
+                    _update(item);
+                  }
+              )
+            ],
+            content: Column(
+              children: <Widget>[
+                TextFormField(
+                  controller: TextEditingController()..text = item.name,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                      labelText: 'Category Name',
+                      hintText: 'e.g. Rent',
+                  ),
+                  onChanged: (value) { _category = value; },
+                ),
+                TextFormField(
+                  controller: TextEditingController()..text = item.description,
+                  decoration: InputDecoration(labelText: 'Description'),
+                  onChanged: (value) { _description = value; },
+                ),
+                TextFormField(
+                  controller: TextEditingController()..text = item.monthlyBudget.toString(),
+                  decoration: InputDecoration(
+                    labelText: 'Monthly Budget',
+                    hintText: 'Enter a number'
+                  ),
+                  onChanged: (value) { _monthlyBudget = int.parse(value); },
+                )
+              ],
+            ),
+          );
+        }
+    );
+  }
+
+  void _save() async {
+    final missingName = SnackBar(content: Text('Please enter a name!'));
+    if(_category == '' || _category == ' ' ) {
+      Scaffold.of(context).showSnackBar(missingName);
+      return;
+    }
+    Navigator.of(context).pop();
+    Categories item = Categories(
+        name: _category,
+        description: _description,
+        monthlyBudget: _monthlyBudget
+    );
+
+    await DB.insert(Categories.table, item);
+    setState(() => _category = '' );
+    setState(() => _description = '' );
+    setState(() => _monthlyBudget = 0 );
+    refresh();
+  }
+
+  void _update(Categories item) async {
+    Navigator.of(context).pop();
+
+    if(_category != '')
+      item.name = _category;
+    if(_description != '')
+      item.description = _description;
+    if(_monthlyBudget != 0)
+      item.monthlyBudget = _monthlyBudget;
+
+    await DB.update(Categories.table, item);
+    setState(() => _category = '' );
+    setState(() => _description = '' );
+    setState(() => _monthlyBudget = 0 );
+    refresh();
+  }
+
+  void _delete(Categories item) async {
+
+    DB.delete(Categories.table, item);
+    refresh();
   }
 
   @override

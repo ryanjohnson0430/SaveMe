@@ -19,7 +19,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   final List<Widget> _children = [
     CategoriesPage(),
     EntriesPage(Colors.deepOrange),
-    ReportsPage(Colors.blue[100])
+    ReportsPage()
   ];
 
   void onTabTapped(int index) {
