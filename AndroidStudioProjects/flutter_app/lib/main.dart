@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/homeWidget.dart';
 import 'package:flutter_app/databases/categories-db.dart';
+import 'package:flutter_app/reportsPage.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:pie_chart/pie_chart.dart';
 
 void main() async {
 
