@@ -18,6 +18,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
   String _description;
   int _monthlyBudget;
 
+  final catController = TextEditingController();
+  final descController = TextEditingController();
+  final budgetController = TextEditingController();
+
   List<Categories> _categories = [];
 
   TextStyle _style = TextStyle(color: Colors.white, fontSize: 24);
@@ -113,26 +117,23 @@ class _CategoriesPageState extends State<CategoriesPage> {
             content: Column(
               children: <Widget>[
                 TextFormField(
-                  controller: TextEditingController()..text = item.name,
+                  controller: catController..text = item.name,
                   autofocus: true,
                   decoration: InputDecoration(
                       labelText: 'Category Name',
                       hintText: 'e.g. Rent',
                   ),
-                  onChanged: (value) { _category = value; },
                 ),
                 TextFormField(
-                  controller: TextEditingController()..text = item.description,
+                  controller: descController..text = item.description,
                   decoration: InputDecoration(labelText: 'Description'),
-                  onChanged: (value) { _description = value; },
                 ),
                 TextFormField(
-                  controller: TextEditingController()..text = item.monthlyBudget.toString(),
+                  controller: budgetController..text = item.monthlyBudget.toString(),
                   decoration: InputDecoration(
                     labelText: 'Monthly Budget',
                     hintText: 'Enter a number'
                   ),
-                  onChanged: (value) { _monthlyBudget = int.parse(value); },
                 )
               ],
             ),
@@ -142,12 +143,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
   }
 
   void _save() async {
-    final missingName = SnackBar(content: Text('Please enter a name!'));
-    if(_category == '' || _category == ' ' ) {
-      Scaffold.of(context).showSnackBar(missingName);
-      return;
-    }
     Navigator.of(context).pop();
+
     Categories item = Categories(
         name: _category,
         description: _description,
@@ -162,6 +159,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
   }
 
   void _update(Categories item) async {
+    _category = catController.text;
+    _description = descController.text;
+    _monthlyBudget = int.parse(budgetController.text);
     Navigator.of(context).pop();
 
     if(_category != '')
