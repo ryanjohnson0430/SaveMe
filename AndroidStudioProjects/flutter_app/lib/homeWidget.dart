@@ -18,7 +18,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   int _currentIndex = 0;
   final List<Widget> _children = [
     CategoriesPage(),
-    EntriesPage(Colors.deepOrange),
+    EntriesPage(),
     ReportsPage()
   ];
 

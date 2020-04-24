@@ -1,77 +1,101 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:pie_chart/pie_chart.dart';
+import 'package:flutter_app/models/entries.dart';
+import 'package:flutter_app/models/categories.dart';
+import 'package:flutter_app/databases/db.dart';
 
 class ReportsPage extends StatefulWidget {
-
   @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
+  _ReportsPageState createState() {
     return _ReportsPageState();
   }
 }
 
+class _ReportsPageState extends State<ReportsPage> {
 
-//pie chart
-class _ReportsPageState extends State<ReportsPage>{
+  Map<String, double> dataMap = new Map();
+  List<Entries> _entries = [];
+  List<Categories> _categories = [];
+  List<DataRow> entryData = [];
 
-  List<PieChartSectionData> _sections = List<PieChartSectionData>();
-
-  @override
-  void initState() {
+  void initState()  {
+    refresh();
     super.initState();
+  }
 
-    PieChartSectionData item1 = PieChartSectionData(
-        color: Colors.blueAccent,
-        value: 40,
-        title: 'food',
-        radius: 50,
-        titleStyle: TextStyle(color: Colors.white,fontSize: 24),
-    );
+  void refresh() async {
+    List<Map<String, dynamic>> _results = await DB.query(Categories.table);
+    List<Map<String, dynamic>> _entryResults = await DB.query(Entries.table);
+    _categories = _results.map((item) => Categories.fromMap(item)).toList();
+    _entries = _entryResults.map((item) => Entries.fromMap(item)).toList();
+    await setDataMap();
+    await setEntryData();
+    setState(() { });
+  }
+  
+  setEntryData() {
+    double totalBudget = 0;
+    double totalSpent = 0;
 
-    PieChartSectionData item2 = PieChartSectionData(
-      color: Colors.orangeAccent,
-      value: 20,
-      title: 'car',
-      radius: 50,
-      titleStyle: TextStyle(color: Colors.white,fontSize: 24),
-    );
+    for(Categories c in _categories) {
+      totalBudget+=c.monthlyBudget;
+    }
 
-    PieChartSectionData item3 = PieChartSectionData(
-      color: Colors.redAccent,
-      value: 30,
-      title: 'clothes',
-      radius: 50,
-      titleStyle: TextStyle(color: Colors.white,fontSize: 24),
-    );
+    for(Entries e in _entries) {
+      totalSpent+=e.amount;
+    }
 
-    PieChartSectionData item4 = PieChartSectionData(
-      color: Colors.yellowAccent,
-      value: 10,
-      title: 'rent',
-      radius: 50,
-      titleStyle: TextStyle(color: Colors.white,fontSize: 24),
-    );
-
-    _sections = [item1, item2, item3, item4];
+    for(Categories c in _categories) {
+      double categorySum = 0;
+      for(Entries e in _entries) {
+        if(c.name.contains(e.category))
+          categorySum+=e.amount;
+      }
+      List<DataCell> cellList = [];
+      cellList.add(DataCell(Text(c.name)));
+      cellList.add(DataCell(Text(((categorySum/totalSpent) * 100).round().toString() + "%")));
+      cellList.add(DataCell(Text(((c.monthlyBudget/totalBudget) * 100).round().toString() + "%")));
+      entryData.add(DataRow(cells: cellList));
+    }
+  }
+  
+  setDataMap() {
+    for(Categories c in _categories) {
+      double categorySum = 0;
+      for(Entries e in _entries) {
+        if(c.name.contains(e.category))
+          categorySum+=e.amount;
+      }
+      dataMap.putIfAbsent(c.name, () => categorySum);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return Container(
-        child: AspectRatio(
-          aspectRatio: 1,
-          child: FlChart(
-            chart: PieChart(
-              PieChartData(
-                  sections: _sections,
-              borderData: FlBorderData(show: false),
-              centerSpaceRadius: 50,
-              sectionsSpace: 0
-              ),
-            ),
-          ),
+    while(dataMap.isEmpty){
+      Map<String, double> placeholder = new Map();
+      placeholder.putIfAbsent("empty", ()=> 0);
+      return PieChart(
+        dataMap: placeholder,
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        PieChart(
+          dataMap: dataMap,
         ),
+        DataTable(
+          columns: [
+            DataColumn(label: Text('Category')),
+            DataColumn(label: Text('Current')),
+            DataColumn(label: Text('Goal'))
+          ],
+          rows: entryData,
+        )
+      ],
     );
   }
+
 }

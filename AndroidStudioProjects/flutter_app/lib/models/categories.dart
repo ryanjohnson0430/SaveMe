@@ -7,7 +7,7 @@ class Categories extends Model{
   int id;
   String name;
   String description;
-  int monthlyBudget;
+  double monthlyBudget;
 
   Categories({this.id, this.name, this.description, this.monthlyBudget});
 
@@ -29,7 +29,7 @@ class Categories extends Model{
       id: map['id'],
       name: map['name'],
       description: map['description'],
-      monthlyBudget: map['monthlyBudget']
+      monthlyBudget: map['monthlyBudget'].toDouble()
     );
 
   }

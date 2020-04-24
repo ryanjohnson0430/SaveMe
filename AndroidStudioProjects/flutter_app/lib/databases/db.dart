@@ -22,9 +22,10 @@ abstract class DB {
     }
   }
 
-  static void onCreate(Database db, int version) async =>
-      await db.execute('CREATE TABLE categories (id INTEGER PRIMARY KEY NOT NULL, '
-          'name STRING, description STRING, monthlyBudget INTEGER)');
+  static void onCreate(Database db, int version) async {
+    await db.execute('CREATE TABLE categories (id INTEGER PRIMARY KEY NOT NULL, name STRING, description STRING, monthlyBudget REAL)');
+    await db.execute('CREATE TABLE entries (id INTEGER PRIMARY KEY NOT NULL, category STRING, entry STRING, amount REAL)');
+  }
 
   static Future<List<Map<String, dynamic>>> query(String table) async => _db.query(table);
 
@@ -36,4 +37,15 @@ abstract class DB {
 
   static Future<int> delete(String table, Model model) async =>
       await _db.delete(table, where: 'id = ?', whereArgs: [model.id]);
+
+  static Future getTotalEntries(String categoryName) async {
+    List<Map> list = await _db.rawQuery('SELECT SUM(amount) FROM entries');
+    print(list[0].values);
+    returnResults(list[0].values.toString());
+  }
+
+  static String returnResults(String results) {
+    return results;
+  }
+
 }

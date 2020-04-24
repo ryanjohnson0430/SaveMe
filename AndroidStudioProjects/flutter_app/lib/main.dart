@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/homeWidget.dart';
-import 'package:flutter_app/databases/categories-db.dart';
+import 'package:flutter_app/databases/db.dart';
 import 'package:flutter_app/reportsPage.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:pie_chart/pie_chart.dart';
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData( primarySwatch: Colors.indigo ),
+      theme: ThemeData( primarySwatch: Colors.grey ),
       home: HomeWidget(title: 'SaveMe'),
     );
   }
